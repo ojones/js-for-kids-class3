@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <title>title</title>
+    <style>
+      .content {
+        margin: 40px;
+        text-align: center;
+      }
+      .box {
+        padding: 10px;
+      }
+      #context {
+        background-color: #FFD;
+        padding: 16px;
+        text-align: left;
+      }
+      #situation {
+        margin: 20px 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <div id="context" class="box">
+        You've been hired by USC to find life in space.  The moons of Jupiter or Saturn
+        seem like the best start.  NASA can provide you a lot of satalite images, but
+        how can we search through all of them to find the ones for potential of life?
+      </div>
+      <div id="situation" class="box">What should we look for?</div>
+      <div id="text-box" class="box"><input id="situation-input" type="text" /></div>
+      <div id="btn-react" class="btn btn-primary">Search</div>
+      <div id="result" class="box"></div>
+      <div id="list-pics" class="box"></div>
+    </div>
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+      crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+   function autorun()
+   {
+      var $situation = $("#situation")
+        , $textbox = $("#situation-input")
+        , $btnreact = $("#btn-react")
+        , $result = $("#result")
+        , $listpics = $("#list-pics")
+
+      $btnreact.on("click", function() {
+
+        $.ajax({
+          type: 'GET',
+            url: 'https://images-api.nasa.gov/search?q=jupiter+moon',
+          dataType: 'json',
+          success: function(data){
+            var pics = []
+              , allItems = data.collection.items
+
+            for (i = 0; i < allItems.length; i++) {
+              var item = allItems[i]
+              if (item.data[0].keywords) {
+                if ($textbox.val() != "") {
+                  if (item.data[0].keywords.indexOf($textbox.val()) > -1) {
+                    var image = item.links[0].href
+                    pics.push('<div><img src="' + image + '"/></div>')
+                  }
+                } else {
+                  var image = item.links[0].href
+                  pics.push('<div><img src="' + image + '"/></div>')
+                }
+              }
+            }
+
+            $listpics.html(pics);
+          }
+        })
+      })
+
+    }
+    if (document.addEventListener) document.addEventListener("DOMContentLoaded", autorun, false);
+    else if (document.attachEvent) document.attachEvent("onreadystatechange", autorun);
+    else window.onload = autorun;
+  </script>
+  </body>
+</html>
