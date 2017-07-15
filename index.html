@@ -34,6 +34,7 @@
       <div id="situation" class="box">What should we look for?</div>
       <div id="text-box" class="box"><input id="situation-input" type="text" /></div>
       <div id="btn-react" class="btn btn-primary">Search</div>
+      <div id="keywords" class="box"></div>
       <div id="result" class="box"></div>
     </div>
     <script
@@ -42,11 +43,16 @@
       crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   <script type="text/javascript">
+    Array.prototype.extend = function (other_array) {
+      /* you should include a test to check whether other_array really is an array */
+      other_array.forEach(function(v) {this.push(v)}, this);
+    }
    function autorun()
    {
       var $situation = $("#situation")
         , $textbox = $("#situation-input")
         , $btnreact = $("#btn-react")
+        , $keywords = $("#keywords")
         , $result = $("#result")
 
       $btnreact.on("click", function() {
@@ -57,11 +63,14 @@
           dataType: 'json',
           success: function(data){
             var pics = []
-              , allItems = data.collection.items
+            var keywords = []
+            var allItems = data.collection.items
+            var max = allItems.length
 
-            for (i = 0; i < allItems.length; i++) {
+            for (i = 0; i < max; i++) {
               var item = allItems[i]
               if (item.data[0].keywords) {
+                keywords.extend(item.data[0].keywords)
                 if ($textbox.val() != "") {
                   if (item.data[0].keywords.indexOf($textbox.val()) > -1) {
                     var image = item.links[0].href
@@ -74,6 +83,9 @@
               }
             }
 
+            var setKeywords = new Set(keywords)
+            var uniqueKeywords = Array.from(setKeywords)
+            $keywords.html(uniqueKeywords.join(", "))
             $result.html(pics);
           }
         })
