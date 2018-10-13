@@ -14,7 +14,7 @@
       }
       #context {
         background-color: #FFD;
-        padding: 16px;
+        padding: 16px 16px 16px 26px;
         text-align: left;
         max-width: 500px;
         display: inline-block;
@@ -32,9 +32,9 @@
         how can we search through all of them to find the ones for potential life?
       </div>
       <div id="situation" class="box">What should we look for?</div>
-      <div id="text-box" class="box"><input id="situation-input" type="text" /></div>
+      <div id="text-box" class="box">Search term: <input id="search-input" type="text" /></div>
       <div id="btn-react" class="btn btn-primary">Search</div>
-      <div id="keywords" class="box"></div>
+      <div id="text-box" class="box">Max number: <input id="max-input" type="text" /></div>
       <div id="result" class="box"></div>
     </div>
     <script
@@ -50,42 +50,30 @@
    function autorun()
    {
       var $situation = $("#situation")
-        , $textbox = $("#situation-input")
+        , $searchInput = $("#search-input")
+        , $maxInput = $("#max-input")
         , $btnreact = $("#btn-react")
-        , $keywords = $("#keywords")
         , $result = $("#result")
 
       $btnreact.on("click", function() {
-
+        var searchTerm = $searchInput.val().split(' ').join('_') || 'saturn'
         $.ajax({
           type: 'GET',
-            url: 'https://images-api.nasa.gov/search?q=earth',
+          url: 'https://images-api.nasa.gov/search?q=' + searchTerm,
           dataType: 'json',
           success: function(data){
             var pics = []
-            var keywords = []
-            var allItems = data.collection.items
-            var max = allItems.length
+            var max = data.collection.items.length
 
-            for (i = 0; i < max; i++) {
-              var item = allItems[i]
-              if (item.data[0].keywords) {
-                keywords.extend(item.data[0].keywords)
-                if ($textbox.val() != "") {
-                  if (item.data[0].keywords.indexOf($textbox.val()) > -1) {
-                    var image = item.links[0].href
-                    pics.push('<div><img src="' + image + '"/></div>')
-                  }
-                } else {
-                  var image = item.links[0].href
-                  pics.push('<div><img src="' + image + '"/></div>')
-                }
-              }
+            if ($maxInput.val() != "" && !isNaN($maxInput.val())) {
+              max = parseInt($maxInput.val())
             }
 
-            var setKeywords = new Set(keywords)
-            var uniqueKeywords = Array.from(setKeywords)
-            $keywords.html(uniqueKeywords.join(", "))
+            for (i = 0; i < max; i++) {
+              var image = data.collection.items[i].links[0].href
+              pics.push('<div><img src="' + image + '"/></div>')
+            }
+
             $result.html(pics);
           }
         })
